@@ -22,10 +22,11 @@ export default defineConfig({
         orientation: 'portrait',
         start_url: '/',
         icons: [
-          { src: 'icons/Rccg_logo.png', sizes: '192x192', type: 'image/png' },
-          { src: 'icons/512.png', sizes: '512x512', type: 'image/png' },
-          { src: 'icons/512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
-        ]
+            { src: 'icons/Rccg_logo.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+            { src: 'icons/Rccg_logo.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
+            { src: 'icons/512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+            { src: 'icons/512-maskable.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+]
       },
       workbox: {
         navigateFallbackDenylist: [/^\/firebase-messaging-sw\.js$/]

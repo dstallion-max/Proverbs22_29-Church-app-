@@ -44,3 +44,8 @@ self.addEventListener('notificationclick', (event) => {
     })
   );
 });
+
+// REQUIRED for Android install prompt to fire
+self.addEventListener('fetch', (event) => {
+  // Empty fetch handler — just needs to exist
+});
