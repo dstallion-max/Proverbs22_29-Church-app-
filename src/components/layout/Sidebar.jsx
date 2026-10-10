@@ -58,7 +58,7 @@ export default function Sidebar() {
         >
           <img
             src="/icons/Rccg_logo.png"
-            alt="RCCG Heghizbah Chapel"
+            alt="RCCG Hephzibah Chapel"
             style={{ width: 32, height: 32, objectFit: 'contain' }}
           />
         </div>

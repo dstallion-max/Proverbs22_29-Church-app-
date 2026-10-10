@@ -48,7 +48,7 @@ app.post('/hooks/send-sms', async (req, res) => {
       'https://api.textbee.dev/api/v1/gateway/send-sms',
       {
         recipients: [phone],
-        message: `Your RCCG Heghizbah code is: ${otp}`,
+        message: `Your Hephzibah code is: ${otp}`,
         deviceId: TEXTBEE_DEVICE_ID,
       },
       {

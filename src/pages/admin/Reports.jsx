@@ -67,7 +67,7 @@ export default function Reports() {
     // Header
     doc.setFontSize(20)
     doc.setTextColor(30, 58, 138)
-    doc.text('RCCG Heghizbah Chapel', pageWidth / 2, 20, { align: 'center' })
+    doc.text('RCCG Hephzibah Chapel', pageWidth / 2, 20, { align: 'center' })
 
     doc.setFontSize(10)
     doc.setTextColor(120)

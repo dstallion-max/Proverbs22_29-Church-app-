@@ -35,7 +35,7 @@ export default function ResetSuccess() {
       </button>
 
       <p className="text-center text-xs mt-6" style={{ color: 'var(--text-dim)' }}>
-        RCCG Heghizbah Chapel · A Place of Grace
+        RCCG Hephzibah Chapel · A Place of Grace
       </p>
     </div>
   );

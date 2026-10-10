@@ -112,7 +112,7 @@ export default function Register() {
               boxShadow: '0 12px 32px rgba(37, 99, 235, 0.22)',
             }}
           >
-            <img src="/icons/Rccg_logo.png" alt="RCCG Heghizbah Chapel" className="w-14 h-14" />
+            <img src="/icons/Rccg_logo.png" alt="RCCG Hephzibah Chapel" className="w-14 h-14" />
           </div>
           <h1 className="font-display text-2xl mt-4 text-center" style={{ color: 'var(--text)' }}>
             {step === 'form' ? 'Join Heghizbah' : 'Verify Phone'}
@@ -186,7 +186,7 @@ export default function Register() {
                     {agreed && <CheckCircle2 size={14} className="text-white" />}
                   </div>
                   <p className="text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-                    I agree to the Terms of Service and Privacy Policy of RCCG Heghizbah Chapel
+                    I agree to the Terms of Service and Privacy Policy of RCCG Hephzibah Chapel
                   </p>
                 </button>
 

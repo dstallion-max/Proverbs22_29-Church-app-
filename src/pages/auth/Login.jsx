@@ -55,7 +55,7 @@ export default function Login() {
               boxShadow: '0 12px 32px rgba(37, 99, 235, 0.25)',
             }}
           >
-            <img src="/icons/Rccg_logo.png" alt="RCCG Heghizbah Chapel" className="w-16 h-16" />
+            <img src="/icons/Rccg_logo.png" alt="RCCG Hephzibah Chapel" className="w-16 h-16" />
           </div>
           <h1 className="font-display text-2xl mt-4 text-center" style={{ color: 'var(--text)' }}>
             Heghizbah Chapel
@@ -164,7 +164,7 @@ export default function Login() {
         </div>
 
         <p className="text-center text-xs mt-6" style={{ color: 'var(--text-dim)' }}>
-          RCCG Heghizbah Chapel · v1.0
+          RCCG Hephzibah Chapel · v1.0
         </p>
       </div>
     </div>

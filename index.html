@@ -22,6 +22,15 @@
       rel="stylesheet"
     />
 
+    <!-- CRITICAL: capture beforeinstallprompt BEFORE React loads -->
+    <script>
+      window.__deferredInstallPrompt = null;
+      window.addEventListener('beforeinstallprompt', function (e) {
+        e.preventDefault();
+        window.__deferredInstallPrompt = e;
+      });
+    </script>
+
     <title>RCCG Hephizibah Chapel</title>
   </head>
   <body>

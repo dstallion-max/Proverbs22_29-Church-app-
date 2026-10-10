@@ -48,7 +48,7 @@ export default function Splash() {
             boxShadow: '0 0 60px rgba(212,175,55,0.35)'
           }}
         >
-          <img src="/icons/Rccg_logo.png" alt="RCCG Heghizbah Chapel" className="w-24 h-24" />
+          <img src="/icons/Rccg_logo.png" alt="RCCG Hephzibah Chapel" className="w-24 h-24" />
         </div>
 
         <h1
@@ -61,7 +61,7 @@ export default function Splash() {
             letterSpacing: '0.5px'
           }}
         >
-          RCCG Heghizbah Chapel
+          RCCG Hephzibah Chapel
         </h1>
 
         <p

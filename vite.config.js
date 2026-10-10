@@ -11,30 +11,32 @@ export default defineConfig({
     qrcode(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'firebase-messaging-sw.js'],
+      includeAssets: ['favicon.ico'],
+      devOptions: {
+        enabled: true,
+        type: 'module',
+      },
       manifest: {
-        name: 'RCCG Heghizbah Chapel',
-        short_name: 'Heghizbah',
-        description: 'Church App for RCCG Heghizbah Chapel',
+        name: 'RCCG Hephzibah Chapel',
+        short_name: 'Hephzibah',
+        description: 'Church App for RCCG Hephzibah Chapel',
         theme_color: '#1e3a8a',
         background_color: '#fdfaf3',
         display: 'standalone',
         orientation: 'portrait',
         start_url: '/',
         icons: [
-            { src: 'icons/Rccg_logo.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
-            { src: 'icons/Rccg_logo.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
-            { src: 'icons/512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
-            { src: 'icons/512-maskable.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
-]
-      },
-      workbox: {
-        navigateFallbackDenylist: [/^\/firebase-messaging-sw\.js$/]
+          { src: 'icons/Rccg_logo.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: 'icons/Rccg_logo.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
+          { src: 'icons/512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: 'icons/512-maskable.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+        ]
       }
     })
   ],
   server: {
     host: '0.0.0.0',
-    port: 5173
+    port: 5173,
+    allowedHosts: ['.ngrok-free.dev', '.ngrok-free.app', '.trycloudflare.com']
   }
 })
