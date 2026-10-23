@@ -42,13 +42,23 @@ export function PushProvider({ children }) {
   useEffect(() => {
     listenForeground((payload) => {
       setLastPush(payload);
-      const title = payload.notification?.title || payload.data?.title || 'Heghizbah';
+      
+      const title = payload.notification?.title || payload.data?.title || 'RCCG Heghizbah';
       const body = payload.notification?.body || payload.data?.body || '';
+
+      // If the app is open, force the Service Worker to show the notification
+      // so it vibrates and pops up in the notification tray.
       if (Notification.permission === 'granted') {
-        new Notification(title, {
-          body,
-          icon: '/icons/192.png',
-          badge: '/icons/192.png',
+        navigator.serviceWorker.ready.then((registration) => {
+          registration.showNotification(title, {
+            body: body,
+            icon: '/icons/192.png',
+            badge: '/icons/192.png',
+            vibrate: [200, 100, 200],
+            data: payload.data || {},
+            tag: payload.data?.tag || 'heghizbah-foreground',
+            renotify: true,
+          });
         });
       }
     });
