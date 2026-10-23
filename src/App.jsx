@@ -88,6 +88,9 @@ export default function App() {
         <Route path="/growth" element={<Growth />} />
         <Route path="/journal" element={<Journal />} />
         <Route path="/my-groups" element={<MyGroups />} />
+        
+        {/* NEW: Member accessible group chat */}
+        <Route path="/groups/:id" element={<GroupDetail />} />
 
         {/* Worker */}
         <Route path="/worker" element={

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Search, Users, Music, Camera, Shield, Sparkles, Heart,
-  Star, CheckCircle2, Clock, Plus, Send, AlertCircle, X
+  Star, CheckCircle2, Clock, Plus, Send, AlertCircle, X, MessageCircle
 } from 'lucide-react';
 import HeroCard, { HeroIcon } from '../../components/common/HeroCard';
 import { supabase } from '../../lib/supabaseClient';
@@ -54,7 +54,6 @@ export default function MyGroups() {
     const groupsData = groupsRes.data || [];
     const reqData = reqRes.data || [];
 
-    // Manually attach group data to requests
     const groupMap = {};
     groupsData.forEach((g) => { groupMap[g.id] = g; });
 
@@ -124,7 +123,7 @@ export default function MyGroups() {
         >
           <ArrowLeft size={20} style={{ color: 'var(--text)' }} />
         </button>
-        <h1 className="text-lg font-semibold" style={{ color: 'var(--text)' }}>Groups</h1>
+        <h1 className="text-lg font-semibold" style={{ color: 'var(--text)' }}>My Groups</h1>
         <div className="w-10" />
       </div>
 
@@ -132,7 +131,7 @@ export default function MyGroups() {
         <HeroCard
           eyebrow="Community"
           title={`${myGroups.length} group${myGroups.length === 1 ? '' : 's'}`}
-          subtitle="Request to join a group"
+          subtitle="Your spiritual families"
           right={<HeroIcon icon={Users} />}
         />
       </div>
@@ -190,9 +189,10 @@ export default function MyGroups() {
           {myGroups.map((g) => {
             const Icon = ICONS[g.icon] || Users;
             return (
-              <div
+              <button
                 key={g.id}
-                className="rounded-2xl p-4 flex items-center gap-3"
+                onClick={() => navigate(`/groups/${g.slug}`)}
+                className="w-full rounded-2xl p-4 flex items-center gap-3 active:scale-[0.98] transition text-left"
                 style={{ background: 'var(--card)', border: `1px solid ${g.color}40` }}
               >
                 <div
@@ -205,8 +205,8 @@ export default function MyGroups() {
                   <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{g.name}</p>
                   <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{g.description}</p>
                 </div>
-                <CheckCircle2 size={20} style={{ color: 'var(--success)' }} />
-              </div>
+                <MessageCircle size={20} style={{ color: g.color }} />
+              </button>
             );
           })}
         </div>

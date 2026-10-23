@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  FileText, Download, TrendingUp, Users, Wallet, Calendar,
+  Download, TrendingUp, Users, Wallet, Calendar,
   ArrowLeft, BarChart3, RefreshCw
 } from 'lucide-react'
 import HeroCard, { HeroIcon } from '../../components/common/HeroCard'
@@ -51,142 +51,206 @@ export default function Reports() {
 
   // Derived stats
   const totalAttendance = attendance.reduce((s, r) => s + (r.total || 0), 0)
-  const avgAttendance = attendance.length > 0
-    ? Math.round(totalAttendance / attendance.length)
-    : 0
+  const avgAttendance = attendance.length > 0 ? Math.round(totalAttendance / attendance.length) : 0
   const totalOffering = offerings.reduce((s, r) => s + Number(r.total || 0), 0)
   const totalFirstTimers = attendance.reduce((s, r) => s + (r.first_timers || 0), 0)
   const servicesCount = attendance.length
 
   const fmtMoney = (n) => `N ${Number(n).toLocaleString()}`
 
+  // --- EXACT RCCG PDF GENERATOR FOR ADMIN ---
   const handleDownloadPDF = () => {
-    const doc = new jsPDF()
-    const pageWidth = doc.internal.pageSize.getWidth()
+    const doc = new jsPDF('p', 'mm', 'a4');
+    
+    // --- HEADER ---
+    doc.setFont('helvetica', 'bold'); 
+    doc.setFontSize(14);
+    doc.text('THE REDEEMED CHRISTIAN CHURCH OF GOD', 105, 15, { align: 'center' });
+    doc.setFontSize(11);
+    doc.text('PROVINCE', 105, 21, { align: 'center' });
+    doc.text('MONTHLY GENERAL PROGRESS REPORT SHEET', 105, 27, { align: 'center' });
+    
+    doc.setFontSize(9); 
+    doc.setFont('helvetica', 'normal');
+    doc.text('AREA: ....................................................', 14, 37);
+    doc.text('PARISH: HEPHIZIBAH PARISH', 14, 43);
+    doc.text(`FOR THE MONTH: ${new Date().toLocaleString('default', { month: 'long' })}`, 14, 49);
+    doc.text(`YEAR: ${new Date().getFullYear()}`, 60, 49);
+    doc.text('MGPR 002', 196, 27, { align: 'right' });
 
-    // Header
-    doc.setFontSize(20)
-    doc.setTextColor(30, 58, 138)
-    doc.text('RCCG Hephzibah Chapel', pageWidth / 2, 20, { align: 'center' })
+    // --- MAIN GRID SETUP ---
+    const startX = 14; 
+    const startY = 55; 
+    const rowH = 5.5; 
+    
+    doc.setLineWidth(0.3);
+    doc.setFontSize(7.5); 
+    doc.setFont('helvetica', 'bold');
 
-    doc.setFontSize(10)
-    doc.setTextColor(120)
-    doc.text('A Place of Grace', pageWidth / 2, 27, { align: 'center' })
+    // Draw outer box for headers (2 rows high)
+    doc.rect(startX, startY, 182, rowH * 2);
 
-    doc.setFontSize(14)
-    doc.setTextColor(0)
-    doc.text('Church Report', pageWidth / 2, 40, { align: 'center' })
+    // Header Text
+    doc.text('DATE', startX + 8, startY + 7.5, { align: 'center' });
+    doc.text('DAYS', startX + 16 + 11, startY + 7.5, { align: 'center' });
+    doc.text('ATTENDANCE', startX + 38 + 27, startY + 3.5, { align: 'center' });
+    
+    // Sub-headers
+    doc.text('Men', startX + 38 + 6, startY + 10, { align: 'center' });
+    doc.text('Women', startX + 50 + 7, startY + 10, { align: 'center' });
+    doc.text('Children', startX + 64 + 7, startY + 10, { align: 'center' });
+    doc.text('Total', startX + 78 + 7, startY + 10, { align: 'center' });
+    
+    doc.text('Preacher', startX + 92 + 13, startY + 7.5, { align: 'center' });
+    doc.text('New\nConverts', startX + 118 + 8, startY + 6.5, { align: 'center' });
+    doc.text('New\nGuest', startX + 134 + 8, startY + 6.5, { align: 'center' });
+    doc.text('Sunday\nOffering', startX + 150 + 16, startY + 6.5, { align: 'center' });
 
-    doc.setFontSize(9)
-    doc.setTextColor(120)
-    const periodLabel = `Period: Last ${range} days (${new Date(Date.now() - parseInt(range) * 86400000).toLocaleDateString('en-NG')} — ${new Date().toLocaleDateString('en-NG')})`
-    doc.text(periodLabel, pageWidth / 2, 47, { align: 'center' })
+    // Vertical lines for headers
+    let currentX = startX;
+    doc.line(currentX + 16, startY, currentX + 16, startY + rowH * 2); // Date
+    doc.line(currentX + 38, startY, currentX + 38, startY + rowH * 2); // Days
+    doc.line(currentX + 92, startY, currentX + 92, startY + rowH * 2); // Attendance end
+    doc.line(currentX + 118, startY, currentX + 118, startY + rowH * 2); // Preacher
+    doc.line(currentX + 134, startY, currentX + 134, startY + rowH * 2); // Converts
+    doc.line(currentX + 150, startY, currentX + 150, startY + rowH * 2); // Guest
+    
+    // Sub-column lines
+    doc.line(currentX + 50, startY + rowH, currentX + 50, startY + rowH * 2);
+    doc.line(currentX + 64, startY + rowH, currentX + 64, startY + rowH * 2);
+    doc.line(currentX + 78, startY + rowH, currentX + 78, startY + rowH * 2);
+    
+    doc.line(startX, startY + rowH, startX + 182, startY + rowH);
 
-    let y = 60
+    // --- DRAW ROWS ---
+    const days = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+    let currentY = startY + (rowH * 2);
 
-    // Summary
-    doc.setFontSize(12)
-    doc.setTextColor(30, 58, 138)
-    doc.text('Summary', 14, y)
-    y += 8
+    const year = new Date().getFullYear();
+    const month = new Date().getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    doc.setFontSize(10)
-    doc.setTextColor(0)
-    doc.text(`Total Attendance: ${totalAttendance}`, 14, y); y += 6
-    doc.text(`Average per Service: ${avgAttendance}`, 14, y); y += 6
-    doc.text(`First Timers: ${totalFirstTimers}`, 14, y); y += 6
-    doc.text(`Services Recorded: ${servicesCount}`, 14, y); y += 6
-    doc.text(`Total Offering: ${fmtMoney(totalOffering)}`, 14, y); y += 10
+    doc.setFont('helvetica', 'normal');
 
-    // Attendance table
-    if (attendance.length > 0) {
-      doc.setFontSize(12)
-      doc.setTextColor(30, 58, 138)
-      doc.text('Attendance by Service', 14, y)
-      y += 8
+    for (let i = 1; i <= daysInMonth; i++) {
+      const d = new Date(year, month, i);
+      const dayName = days[d.getDay()];
+      const dateStr = `${String(i).padStart(2, '0')}/${String(month + 1).padStart(2, '0')}/${String(year).slice(2)}`;
+      
+      const record = attendance.find(h => new Date(h.service_date).getDate() === i);
+      const offRecord = offerings.find(h => new Date(h.service_date).getDate() === i);
+      
+      doc.rect(startX, currentY, 182, rowH);
 
-      doc.setFontSize(9)
-      doc.setTextColor(80)
-      doc.text('Date', 14, y)
-      doc.text('Men', 55, y)
-      doc.text('Women', 75, y)
-      doc.text('Teens', 100, y)
-      doc.text('Children', 125, y)
-      doc.text('First', 155, y)
-      doc.text('Total', 175, y)
-      y += 2
-      doc.line(14, y, pageWidth - 14, y)
-      y += 5
-
-      doc.setTextColor(0)
-      attendance.slice(0, 20).forEach((r) => {
-        if (y > 270) {
-          doc.addPage()
-          y = 20
-        }
-        doc.text(new Date(r.service_date).toLocaleDateString('en-NG'), 14, y)
-        doc.text(String(r.adults_male || 0), 55, y)
-        doc.text(String(r.adults_female || 0), 75, y)
-        doc.text(String(r.teens || 0), 100, y)
-        doc.text(String(r.children || 0), 125, y)
-        doc.text(String(r.first_timers || 0), 155, y)
-        doc.text(String(r.total || 0), 175, y)
-        y += 6
-      })
-      y += 6
-    }
-
-    // Offering table
-    if (offerings.length > 0) {
-      if (y > 240) {
-        doc.addPage()
-        y = 20
+      doc.text(dateStr, startX + 8, currentY + 3.8, { align: 'center' });
+      doc.text(dayName, startX + 16 + 11, currentY + 3.8, { align: 'center' });
+      
+      if (record) {
+        doc.text(String(record.adults_male || ''), startX + 38 + 6, currentY + 3.8, { align: 'center' });
+        doc.text(String(record.adults_female || ''), startX + 50 + 7, currentY + 3.8, { align: 'center' });
+        doc.text(String(record.children || ''), startX + 64 + 7, currentY + 3.8, { align: 'center' });
+        doc.text(String(record.total || ''), startX + 78 + 7, currentY + 3.8, { align: 'center' });
+      }
+      
+      if (offRecord) {
+         doc.text(String(offRecord.total || ''), startX + 150 + 16, currentY + 3.8, { align: 'center' });
       }
 
-      doc.setFontSize(12)
-      doc.setTextColor(30, 58, 138)
-      doc.text('Offerings by Service', 14, y)
-      y += 8
+      // Vertical lines
+      doc.line(startX + 16, currentY, startX + 16, currentY + rowH);
+      doc.line(startX + 38, currentY, startX + 38, currentY + rowH);
+      doc.line(startX + 50, currentY, startX + 50, currentY + rowH);
+      doc.line(startX + 64, currentY, startX + 64, currentY + rowH);
+      doc.line(startX + 78, currentY, startX + 78, currentY + rowH);
+      doc.line(startX + 92, currentY, startX + 92, currentY + rowH);
+      doc.line(startX + 118, currentY, startX + 118, currentY + rowH);
+      doc.line(startX + 134, currentY, startX + 134, currentY + rowH);
+      doc.line(startX + 150, currentY, startX + 150, currentY + rowH);
 
-      doc.setFontSize(9)
-      doc.setTextColor(80)
-      doc.text('Date', 14, y)
-      doc.text('Type', 60, y)
-      doc.text('Total', 160, y)
-      y += 2
-      doc.line(14, y, pageWidth - 14, y)
-      y += 5
-
-      doc.setTextColor(0)
-      offerings.slice(0, 25).forEach((r) => {
-        if (y > 270) {
-          doc.addPage()
-          y = 20
-        }
-        doc.text(new Date(r.service_date).toLocaleDateString('en-NG'), 14, y)
-        doc.text(String(r.offering_type || ''), 60, y)
-        doc.text(fmtMoney(r.total), 160, y)
-        y += 6
-      })
+      currentY += rowH;
     }
 
-    // Footer
-    const pageCount = doc.internal.getNumberOfPages()
-    for (let i = 1; i <= pageCount; i++) {
-      doc.setPage(i)
-      doc.setFontSize(8)
-      doc.setTextColor(150)
-      doc.text(
-        `Generated ${new Date().toLocaleString('en-NG')} · Page ${i} of ${pageCount}`,
-        pageWidth / 2,
-        doc.internal.pageSize.getHeight() - 8,
-        { align: 'center' }
-      )
-    }
+    // --- AVERAGE ATTENDANCE BLOCK ---
+    doc.setFont('helvetica', 'bold');
+    const avgHeaderH = 8;
+    const avgRowH = 6;
+    
+    // Adjusted widths so the text doesn't overlap
+    const blockHeight = avgHeaderH + (avgRowH * 3);
+    doc.rect(startX, currentY, 92, blockHeight);
 
-    const filename = `Heghizbah-Report-${new Date().toISOString().split('T')[0]}.pdf`
-    doc.save(filename)
-  }
+    // Top Header row
+    doc.text('Average', startX + 8, currentY + 5, { align: 'center' });
+    doc.text('Attendance', startX + 8, currentY + 7.5, { align: 'center' });
+    
+    doc.text('Men', startX + 50, currentY + 5, { align: 'center' });
+    doc.text('Women', startX + 63, currentY + 5, { align: 'center' });
+    doc.text('Children', startX + 76, currentY + 5, { align: 'center' });
+    doc.text('Total', startX + 86, currentY + 5, { align: 'center' });
+
+    // Draw Header Lines
+    doc.line(startX, currentY + avgHeaderH, startX + 92, currentY + avgHeaderH);
+    doc.line(startX + 16, currentY, startX + 16, currentY + blockHeight);
+    doc.line(startX + 44, currentY, startX + 44, currentY + blockHeight); // Days column
+    doc.line(startX + 57, currentY + avgHeaderH, startX + 57, currentY + blockHeight); // Men
+    doc.line(startX + 69, currentY + avgHeaderH, startX + 69, currentY + blockHeight); // Women
+    doc.line(startX + 81, currentY + avgHeaderH, startX + 81, currentY + blockHeight); // Children
+
+    // Draw Data Rows
+    doc.setFont('helvetica', 'normal');
+    
+    // Calculate Averages
+    const getDayData = (dayIndex) => attendance.filter(h => new Date(h.service_date).getDay() === dayIndex);
+    const tuesData = getDayData(2);
+    const thursData = getDayData(4);
+    const sunData = getDayData(0);
+    
+    const calcAvg = (data, key) => data.length > 0 ? Math.round(data.reduce((sum, item) => sum + (item[key] || 0), 0) / data.length) : 0;
+
+    // Helper to draw a single row in the average block
+    const drawAvgRow = (label, data, y) => {
+      const m = calcAvg(data, 'adults_male');
+      const w = calcAvg(data, 'adults_female');
+      const c = calcAvg(data, 'children');
+      const t = m + w + c; // Calculating the correct total
+
+      doc.text(label, startX + 30, y, { align: 'center' });
+      doc.text(String(m), startX + 50, y, { align: 'center' });
+      doc.text(String(w), startX + 63, y, { align: 'center' });
+      doc.text(String(c), startX + 76, y, { align: 'center' });
+      doc.text(String(t), startX + 86, y, { align: 'center' });
+    };
+
+    // Row 1: Tuesday
+    let rowY = currentY + avgHeaderH + 4.5;
+    drawAvgRow('TUESDAY', tuesData, rowY);
+
+    // Row 2: Thursday
+    rowY += avgRowH;
+    drawAvgRow('THURSDAY', thursData, rowY);
+
+    // Row 3: Sunday
+    rowY += avgRowH;
+    drawAvgRow('SUNDAY', sunData, rowY);
+
+    // Horizontal lines for the 3 data rows
+    doc.line(startX, currentY + avgHeaderH + avgRowH, startX + 92, currentY + avgHeaderH + avgRowH);
+    doc.line(startX, currentY + avgHeaderH + avgRowH * 2, startX + 92, currentY + avgHeaderH + avgRowH * 2);
+
+
+    // --- FOOTER SIGNATURE ---
+    let finalY = currentY + blockHeight + 15;
+    
+    // The totals block on the right side
+    const totalOfferingMonth = offerings.reduce((sum, r) => sum + Number(r.total || 0), 0);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`TOTAL AMOUNT REMITTED: N ${totalOfferingMonth.toLocaleString()}`, 196, finalY - 10, { align: 'right' });
+
+    doc.text('_________________________________', 14, finalY);
+    doc.text('Pastor in Charge of Parish', 14, finalY + 5);
+
+    doc.save(`RCCG_MGPR_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+  };
 
   return (
     <div className="anim-fade-up min-h-screen" style={{ background: 'var(--bg)' }}>
@@ -349,7 +413,7 @@ export default function Reports() {
               style={{ background: 'var(--primary)' }}
             >
               <Download size={18} />
-              Download PDF Report
+              Download MGPR Report
             </button>
           </div>
         </>

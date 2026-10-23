@@ -2,16 +2,14 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Users, Music, Camera, Baby, Shield, Sparkles,
-  Heart, ChevronRight, CheckCircle2, Send, RefreshCw, Layers
+  Heart, ChevronRight, CheckCircle2, Send, RefreshCw, Layers, Settings
 } from 'lucide-react';
 import HeroCard, { HeroIcon } from '../../components/common/HeroCard';
 import { supabase } from '../../lib/supabaseClient';
 import { useAuth } from '../../context/AuthContext';
 import { friendlyError } from '../../utils/errors';
 
-const ICON_MAP = {
-  Users, Music, Camera, Baby, Shield, Sparkles, Heart, Layers,
-};
+const ICON_MAP = { Users, Music, Camera, Baby, Shield, Sparkles, Heart, Layers };
 
 export default function Departments() {
   const navigate = useNavigate();
@@ -25,6 +23,7 @@ export default function Departments() {
   const [sending, setSending] = useState(false);
 
   const mySlugs = profile?.groups || [];
+  const isAdmin = profile?.role === 'admin';
 
   useEffect(() => {
     loadDepartments();
@@ -33,9 +32,7 @@ export default function Departments() {
   const loadDepartments = async () => {
     setLoading(true);
     setError('');
-
     const { data, error } = await supabase.rpc('get_department_stats');
-
     setLoading(false);
 
     if (error) {
@@ -43,7 +40,13 @@ export default function Departments() {
       return;
     }
 
-    setDepartments((data || []).filter((d) => d.type === 'department'));
+    // Filter: Admin sees all, workers see only their own departments
+    const allDepts = (data || []).filter((d) => d.type === 'department');
+    const visibleDepts = isAdmin 
+      ? allDepts 
+      : allDepts.filter((d) => mySlugs.includes(d.slug));
+
+    setDepartments(visibleDepts);
   };
 
   const handleRequest = async () => {
@@ -93,7 +96,7 @@ export default function Departments() {
         <HeroCard
           eyebrow="Serve in Ministry"
           title="Departments"
-          subtitle="You can belong to more than one"
+          subtitle={isAdmin ? "Manage all departments" : "Your assigned departments"}
           right={<HeroIcon icon={Users} />}
         />
       </div>
@@ -106,23 +109,22 @@ export default function Departments() {
 
       {loading && (
         <div className="flex justify-center py-12">
-          <div
-            className="w-10 h-10 rounded-full border-2 animate-spin"
-            style={{ borderColor: 'var(--border)', borderTopColor: 'var(--primary)' }}
-          />
+          <div className="w-10 h-10 rounded-full border-2 animate-spin" style={{ borderColor: 'var(--border)', borderTopColor: 'var(--primary)' }} />
         </div>
       )}
 
       {!loading && departments.length === 0 && (
         <div className="px-5 mt-6">
-          <div
-            className="rounded-2xl p-6 text-center"
-            style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
-          >
+          <div className="rounded-2xl p-6 text-center" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
             <Users size={28} className="mx-auto" style={{ color: 'var(--text-muted)' }} />
-            <p className="text-sm mt-3" style={{ color: 'var(--text-muted)' }}>
-              No departments yet
-            </p>
+            <p className="text-sm mt-3" style={{ color: 'var(--text-muted)' }}>You are not in any department yet.</p>
+            <button 
+              onClick={() => navigate('/my-groups')} 
+              className="mt-4 px-4 py-2 rounded-xl text-xs font-medium"
+              style={{ background: 'var(--primary)', color: '#fff' }}
+            >
+              Browse & Request to Join
+            </button>
           </div>
         </div>
       )}
@@ -130,7 +132,7 @@ export default function Departments() {
       {!loading && departments.length > 0 && (
         <div className="px-5 mt-5 pb-6 space-y-2">
           {departments.map((d) => {
-            const isMine = mySlugs.includes(d.slug);
+            const isMine = mySlugs.includes(d.slug) || isAdmin;
             const Icon = ICON_MAP[d.icon] || Users;
             const color = d.color || 'var(--primary)';
 
@@ -138,32 +140,20 @@ export default function Departments() {
               <div
                 key={d.slug}
                 className="rounded-2xl p-4 flex items-center gap-3"
-                style={{
-                  background: 'var(--card)',
-                  border: `1px solid ${isMine ? color : 'var(--border)'}`,
-                }}
+                style={{ background: 'var(--card)', border: `1px solid ${isMine ? color : 'var(--border)'}` }}
               >
                 <button
                   onClick={() => navigate(`/worker/department/${d.slug}`)}
                   className="flex items-center gap-3 flex-1 min-w-0 text-left"
                 >
-                  <div
-                    className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
-                    style={{ background: `${color}20` }}
-                  >
+                  <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${color}20` }}>
                     <Icon size={20} style={{ color }} />
                   </div>
-
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>
-                        {d.name}
-                      </p>
+                      <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{d.name}</p>
                       {isMine && (
-                        <span
-                          className="text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded"
-                          style={{ background: 'var(--success-soft)', color: 'var(--success)' }}
-                        >
+                        <span className="text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded" style={{ background: 'var(--success-soft)', color: 'var(--success)' }}>
                           Member
                         </span>
                       )}
@@ -174,14 +164,14 @@ export default function Departments() {
                   </div>
                 </button>
 
-                {isMine ? (
+                {isAdmin ? (
+                  <button onClick={() => navigate('/admin/roles')} className="w-8 h-8 rounded-full flex items-center justify-center bg-[var(--card-soft)]">
+                    <Settings size={16} style={{ color: 'var(--text)' }} />
+                  </button>
+                ) : isMine ? (
                   <CheckCircle2 size={20} style={{ color }} />
                 ) : (
-                  <button
-                    onClick={() => setShowJoin(d)}
-                    className="px-3 py-1.5 rounded-lg text-xs font-medium shrink-0"
-                    style={{ background: 'var(--primary-soft)', color: 'var(--primary)' }}
-                  >
+                  <button onClick={() => setShowJoin(d)} className="px-3 py-1.5 rounded-lg text-xs font-medium shrink-0" style={{ background: 'var(--primary-soft)', color: 'var(--primary)' }}>
                     Request
                   </button>
                 )}
@@ -193,33 +183,18 @@ export default function Departments() {
 
       {showJoin && (
         <div className="fixed inset-0 z-50 flex items-end justify-center">
-          <div
-            className="absolute inset-0 backdrop-blur-sm"
-            style={{ background: 'rgba(0,0,0,0.5)' }}
-            onClick={() => !sending && setShowJoin(null)}
-          />
-          <div
-            className="relative w-full max-w-md rounded-t-3xl p-5 safe-bottom anim-slide-up"
-            style={{ background: 'var(--bg-soft)' }}
-          >
+          <div className="absolute inset-0 backdrop-blur-sm" style={{ background: 'rgba(0,0,0,0.5)' }} onClick={() => !sending && setShowJoin(null)} />
+          <div className="relative w-full max-w-md rounded-t-3xl p-5 safe-bottom anim-slide-up" style={{ background: 'var(--bg-soft)' }}>
             <div className="w-12 h-1 rounded-full mx-auto mb-4" style={{ background: 'var(--text-dim)' }} />
-            <h3 className="text-lg font-semibold mb-1" style={{ color: 'var(--text)' }}>
-              Request to Join {showJoin.name}
-            </h3>
-            <p className="text-xs mb-4" style={{ color: 'var(--text-muted)' }}>
-              The department leader will review your request
-            </p>
+            <h3 className="text-lg font-semibold mb-1" style={{ color: 'var(--text)' }}>Request to Join {showJoin.name}</h3>
+            <p className="text-xs mb-4" style={{ color: 'var(--text-muted)' }}>The department leader will review your request.</p>
             <textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="Why do you want to join? (optional)"
               rows={3}
               className="w-full p-3.5 rounded-2xl text-sm focus:outline-none resize-none"
-              style={{
-                background: 'var(--card)',
-                color: 'var(--text)',
-                border: '1px solid var(--border)',
-              }}
+              style={{ background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)' }}
             />
             <button
               onClick={handleRequest}

@@ -49,9 +49,11 @@ export async function registerPushToken(userId) {
     .from('push_subscriptions')
     .upsert(payload, { onConflict: 'endpoint' });
 
-  if (error) return { ok: false, reason: 'db_error', error };
+  if (error) {
+    console.error("Push Registration Error:", error);
+    return { ok: false, reason: 'db_error', error };
+  }
 
-  // Mark push_enabled on profile
   await supabase.from('profiles').update({ push_enabled: true }).eq('id', userId);
 
   return { ok: true, token };
