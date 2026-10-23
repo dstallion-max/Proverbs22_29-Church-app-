@@ -218,7 +218,7 @@ export default function Profile() {
               </button>
             </div>
 
-            <SettingsRow icon={UserCog} label="Developer" value="Hephizabah youth" />
+            <SettingsRow icon={UserCog} label="Developer" value="Hephzibah youth" />
             <SettingsRow icon={Smartphone} label="App Version" value="1.0.2" />
             <SettingsRow icon={Code2} label="Design By" value="Victor Marke" />
 

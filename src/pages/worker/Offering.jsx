@@ -140,7 +140,7 @@ export default function Offering() {
     
     doc.setFontSize(9); doc.setFont('helvetica', 'normal');
     doc.text('AREA: ....................................................', 14, 35);
-    doc.text('PARISH: HEPHIZIBAH PARISH', 14, 41);
+    doc.text('PARISH: HEPHZIBAH PARISH', 14, 41);
     doc.text(`FOR THE MONTH: ${new Date(serviceDate).toLocaleString('default', { month: 'long' })}`, 14, 47);
     doc.text(`YEAR: ${new Date(serviceDate).getFullYear()}`, 60, 47);
     doc.text('MGPR 002', 180, 27, { align: 'right' });
