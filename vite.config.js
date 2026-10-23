@@ -11,10 +11,16 @@ export default defineConfig({
     qrcode(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico'],
+      includeAssets: ['favicon.ico', 'firebase-messaging-sw.js'],
       devOptions: {
         enabled: true,
         type: 'module',
+      },
+      workbox: {
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
+        navigateFallbackDenylist: [/^\/firebase-messaging-sw\.js$/]
       },
       manifest: {
         name: 'RCCG Hephzibah Chapel',
@@ -34,7 +40,7 @@ export default defineConfig({
       }
     })
   ],
-    esbuild: {
+  esbuild: {
     drop: ['console', 'debugger'],
   },
   server: {
